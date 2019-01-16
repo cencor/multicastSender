@@ -38,7 +38,7 @@ public class ConsumeJson {
     private static DatagramSocket socket = null;
     private static final short HEADER_LENGTH = 17;
     private static final int TOTAL_MESSAGE = 1;
-    private static final int MARKET_DATA_GROUP = 1;
+    
     private static final int SESSION = 14;
     private static final String CLOSING_PRICE_TYPE = "N";
     private static final String DEBT_METALS_MMARKET_TYPE = "b";
@@ -54,7 +54,7 @@ public class ConsumeJson {
     private static final String TRANSACTION_CHANGE_STATUS_TYPE = "L";
     private static final String ISSUER_OPERATIVITY_TYPE = "o";
     private static final String SYSTEM_EVENT_TYPE = "S";
-    
+    private static int MARKET_DATA_GROUP;
     
     public static void main(String[] args) throws IOException {
         
@@ -73,9 +73,10 @@ public class ConsumeJson {
         final String path = propiedades.getProperty("PATH");
         final String ip = propiedades.getProperty("IP_BROADCAST");
         final String strPort = propiedades.getProperty("PORT_BROADCAST");
+        final String group = propiedades.getProperty("GROUP");
         final String strTotalMessages = propiedades.getProperty("TOTAL_MESSAGES");
-        final String strSecondsWaiting = propiedades.getProperty("SECONDS_WAITING");
-             
+        final String strSecondsWaiting = propiedades.getProperty("MILLISECONDS_WAITING");
+        MARKET_DATA_GROUP = Integer.parseInt(group);     
         Integer port = Integer.parseInt(strPort);
         Integer totalDeMensajes = Integer.parseInt(strTotalMessages);
         Integer tiempoDeEspera = Integer.parseInt(strSecondsWaiting);
@@ -100,13 +101,16 @@ public class ConsumeJson {
                 final IEncoder encoder = new EncoderImpl();
                 final byte[] byteResult;
                 final byte[] message;
+                
                 switch (type.toString()) {
                 case CLOSING_PRICE_TYPE:
                     messageString = new Gson().fromJson(locObj, ClosingPriceVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = ClosingPriceEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = ClosingPriceEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)ClosingPriceEncoder.BLOCK_LENGTH),byteResult);
+                    
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                     
@@ -116,9 +120,9 @@ public class ConsumeJson {
                    
                     messageString = new Gson().fromJson(locObj, DebtMetalsMoneyInstrumentCatalogVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = DebtMetalsMoneyInstrumentCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = DebtMetalsMoneyInstrumentCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)DebtMetalsMoneyInstrumentCatalogEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                     break;
@@ -127,9 +131,9 @@ public class ConsumeJson {
                     
                     messageString = new Gson().fromJson(locObj, WarrantsInstrumentCatalogVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = WarrantsInstrumentCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = WarrantsInstrumentCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)WarrantsInstrumentCatalogEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                     
@@ -138,9 +142,9 @@ public class ConsumeJson {
                 case STATUS_CHANGES_TYPE:
                     messageString = new Gson().fromJson(locObj, StatusChangesVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = StatusChangesEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = StatusChangesEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)StatusChangesEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break; 
@@ -148,9 +152,9 @@ public class ConsumeJson {
                 case LOCAL_GLOBAL_MARKET_CATALOG_TYPE:
                     messageString = new Gson().fromJson(locObj, LocalGlobalMarketCatalogVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = LocalGlobalMarketCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = LocalGlobalMarketCatalogEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)LocalGlobalMarketCatalogEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -158,9 +162,9 @@ public class ConsumeJson {
                 case REGISTRY_OPERATIONS_TYPE:
                     messageString = new Gson().fromJson(locObj, RegistryOperationsVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = RegistryOperationsEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = RegistryOperationsEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)RegistryOperationsEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -168,9 +172,9 @@ public class ConsumeJson {
                 case ISSUER_SUSPENSION_TYPE:
                     messageString = new Gson().fromJson(locObj, IssuerSuspensionVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = IssuerOperativityEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = IssuerOperativityEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)IssuerOperativityEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -178,9 +182,9 @@ public class ConsumeJson {
                 case ISSUERS_LIFTING_TYPE:
                     messageString = new Gson().fromJson(locObj, IssuersLiftingVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = IssuersLiftingEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = IssuersLiftingEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)IssuersLiftingEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -188,9 +192,9 @@ public class ConsumeJson {
                 case TRANSACTION_CHANGE_STATUS_TYPE:
                     messageString = new Gson().fromJson(locObj, TransactionChangeStatusVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = TransactionChangeStatusEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = TransactionChangeStatusEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)TransactionChangeStatusEncoder.BLOCK_LENGTH ),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -198,9 +202,9 @@ public class ConsumeJson {
                 case ISSUER_OPERATIVITY_TYPE:
                     messageString = new Gson().fromJson(locObj, IssuerOperativityVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = IssuerOperativityEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = IssuerOperativityEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)IssuerOperativityEncoder.BLOCK_LENGTH ),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -208,9 +212,9 @@ public class ConsumeJson {
                 case SYSTEM_EVENT_TYPE:
                     messageString = new Gson().fromJson(locObj, SystemEventVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = SystemEventEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = SystemEventEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)SystemEventEncoder.BLOCK_LENGTH ),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port); 
                 break;
@@ -218,9 +222,9 @@ public class ConsumeJson {
                 case WEIGHTED_AVERAGE_PRICE_TYPE:
                     messageString = new Gson().fromJson(locObj, WeightedAveragePriceVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = WeightedAveragePriceEncoder.BLOCK_LENGTH + HEADER_LENGTH;
+                    messageLenght = WeightedAveragePriceEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)WeightedAveragePriceEncoder.BLOCK_LENGTH ),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
@@ -235,7 +239,7 @@ public class ConsumeJson {
                 conteoDeMensajes=conteoDeMensajes+1;
             } catch (Exception e) {
 
-                System.out.println(e.getMessage());
+                System.out.println(e);
             }
         }
         br.close();
@@ -261,8 +265,8 @@ public class ConsumeJson {
 
     }
 
-    private static byte[] createHeader(Integer sequence, Short length) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_LENGTH);
+    private static byte[] createHeader(Integer sequence, Short length, Short blockLenght) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_LENGTH+2);
         byteBuffer.clear();
         byteBuffer.putShort(length);
         byteBuffer.put((byte) TOTAL_MESSAGE);
@@ -270,6 +274,7 @@ public class ConsumeJson {
         byteBuffer.put((byte) SESSION);
         byteBuffer.putInt(sequence);
         byteBuffer.putLong(System.currentTimeMillis());
+        byteBuffer.putShort(blockLenght);
         byteBuffer.flip();
 
         final byte[] headerBytes = new byte[byteBuffer.remaining()];
