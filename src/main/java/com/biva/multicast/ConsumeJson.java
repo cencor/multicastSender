@@ -24,6 +24,7 @@ import mx.com.biva.codec.core.impl.EncoderImpl;
 import mx.com.biva.codec.core.sbe.ClosingPriceEncoder;
 import mx.com.biva.codec.core.sbe.DebtMetalsMoneyInstrumentCatalogEncoder;
 import mx.com.biva.codec.core.sbe.IssuerOperativityEncoder;
+import mx.com.biva.codec.core.sbe.IssuerSuspensionEncoder;
 import mx.com.biva.codec.core.sbe.IssuersLiftingEncoder;
 import mx.com.biva.codec.core.sbe.LocalGlobalMarketCatalogEncoder;
 import mx.com.biva.codec.core.sbe.RegistryOperationsEncoder;
@@ -172,9 +173,9 @@ public class ConsumeJson {
                 case ISSUER_SUSPENSION_TYPE:
                     messageString = new Gson().fromJson(locObj, IssuerSuspensionVO.class).toString();
                     System.out.println(messageString);
-                    messageLenght = IssuerOperativityEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
+                    messageLenght = IssuerSuspensionEncoder.BLOCK_LENGTH + HEADER_LENGTH+2;
                     byteResult = encoder.encode(messageString);
-                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)IssuerOperativityEncoder.BLOCK_LENGTH),byteResult);
+                    message = ArrayUtils.addAll(createHeader(rootObj.get("SeqNum").getAsInt(),messageLenght,(short)IssuerSuspensionEncoder.BLOCK_LENGTH),byteResult);
                     //System.out.println(Arrays.toString(message));
                     broadcast(message, InetAddress.getByName(ip),port);
                 break;
