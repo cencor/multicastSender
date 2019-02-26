@@ -8,7 +8,7 @@
  */
 package com.biva.multicast;
 
-
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Clase del mensaje Issuers Lifting.
@@ -18,10 +18,13 @@ package com.biva.multicast;
 public class IssuersLiftingVO extends AbstractVO {
 
     /** The lifting time. */
+	@SerializedName("Date for Unsuspension")
     private long liftingTime;
     /** The lifting type. */
+	@SerializedName("Unsuspension Type")
     private char liftingType;
     /** The auction duration. */
+	@SerializedName("Auction Duration")
     private short auctionDuration;
 
     /**
